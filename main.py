@@ -1,12 +1,16 @@
 import asyncio
-
 from agents.auctioneer_agent import AuctioneerAgent
 from agents.bidder_agent import BidderAgent
 from agents.monitor_agent import MonitorAgent
 
 
 async def main():
-    print("Starting Auction Multi-Agent System...\n")
+    print("Starting Auction House Multi-Agent System...\n")
+
+    # =========================
+    # Create Auctioneer Agent
+    # =========================
+    auctioneer = AuctioneerAgent("auctioneer@localhost", "password")
 
     auctioneer.item = {
         "id": 1,
@@ -15,25 +19,22 @@ async def main():
         "current_price": 200000,
     }
 
-    # =========================
-    # Create Auctioneer Agent
-    # =========================
-    auctioneer = AuctioneerAgent("auctioneer@localhost", "password")
-
     # Auction configuration
-    auctioneer.start_price = 100
+    auctioneer.start_price = 100000
     auctioneer.auction_time = 10  # seconds
 
     # =========================
     # Create Bidder Agents
     # =========================
     bidders = [
-        BidderAgent("bidder1@localhost", "password", strategy="aggressive", budget=300),
         BidderAgent(
-            "bidder2@localhost", "password", strategy="conservative", budget=180
+            "bidder1@localhost", "password", strategy="aggressive", budget=500000
         ),
-        BidderAgent("bidder3@localhost", "password", strategy="random", budget=250),
-        BidderAgent("bidder4@localhost", "password", strategy="sniper", budget=350),
+        BidderAgent(
+            "bidder2@localhost", "password", strategy="conservative", budget=200000
+        ),
+        BidderAgent("bidder3@localhost", "password", strategy="random", budget=400000),
+        BidderAgent("bidder4@localhost", "password", strategy="sniper", budget=600000),
     ]
 
     # List of bidder JIDs (used by auctioneer)
@@ -47,11 +48,11 @@ async def main():
     # =========================
     # Start All Agents
     # =========================
-    await auctioneer.start()
-    await monitor.start()
+    await auctioneer.start(auto_register=True)
+    await monitor.start(auto_register=True)
 
     for bidder in bidders:
-        await bidder.start()
+        await bidder.start(auto_register=True)
 
     print("\nAll agents started. Auction running...\n")
 

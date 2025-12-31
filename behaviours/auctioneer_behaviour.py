@@ -9,6 +9,7 @@ class AuctionBehaviour(OneShotBehaviour):
 
         print("\n=== AUCTION STARTED ===")
         print(f"Item: {item['name']}")
+        print(f"Description: {item['description']}")
         print(f"Starting Price: {item['current_price']}\n")
 
         # Broadcast item to bidders
