@@ -48,11 +48,14 @@ async def main():
     # =========================
     # Start All Agents
     # =========================
-    await auctioneer.start(auto_register=True)
-    await monitor.start(auto_register=True)
 
     for bidder in bidders:
         await bidder.start(auto_register=True)
+
+    await asyncio.sleep(1)
+
+    await auctioneer.start(auto_register=True)
+    await monitor.start(auto_register=True)
 
     print("\nAll agents started. Auction running...\n")
 

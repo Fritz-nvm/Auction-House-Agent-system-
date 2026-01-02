@@ -16,7 +16,16 @@ class AuctionBehaviour(OneShotBehaviour):
         for bidder in self.agent.bidders:
             msg = Message(to=bidder)
             msg.set_metadata("performative", "cfp")
-            msg.body = f"ITEM:{item['name']};" f"PRICE:{item['current_price']}"
+
+            # ✅ FIXED CFP BODY
+            msg.body = str(
+                {
+                    "item": item,
+                    "current_price": item["current_price"],
+                    "time_left": self.agent.auction_time,
+                }
+            )
+
             await self.send(msg)
 
         start_time = time.time()
@@ -30,7 +39,7 @@ class AuctionBehaviour(OneShotBehaviour):
                 if bid > item["current_price"]:
                     item["current_price"] = bid
                     highest_bidder = str(msg.sender)
-                    print(f"New highest bid: {bid} " f"by {msg.sender}")
+                    print(f"New highest bid: {bid} by {msg.sender}")
 
         print("\n=== AUCTION ENDED ===")
         if highest_bidder:
@@ -40,7 +49,7 @@ class AuctionBehaviour(OneShotBehaviour):
 
             win_msg = Message(to=highest_bidder)
             win_msg.set_metadata("performative", "accept")
-            win_msg.body = f"You won {item['name']} " f"for {item['current_price']}"
+            win_msg.body = f"You won {item['name']} for {item['current_price']}"
             await self.send(win_msg)
         else:
             print("No bids received.")
