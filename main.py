@@ -7,25 +7,7 @@ from agents.monitor_agent import MonitorAgent
 async def main():
     print("Starting Auction House Multi-Agent System...\n")
 
-    # =========================
-    # Create Auctioneer Agent
-    # =========================
-    auctioneer = AuctioneerAgent("auctioneer@localhost", "password")
-
-    auctioneer.item = {
-        "id": 1,
-        "name": "Gaming Laptop",
-        "description": "16GB RAM, RTX 3060",
-        "current_price": 200000,
-    }
-
-    # Auction configuration
-    auctioneer.start_price = 100000
-    auctioneer.auction_time = 10  # seconds
-
-    # =========================
-    # Create Bidder Agents
-    # =========================
+    #  Initialize Bidders first
     bidders = [
         BidderAgent(
             "bidder1@localhost", "password", strategy="aggressive", budget=500000
@@ -37,45 +19,66 @@ async def main():
         BidderAgent("bidder4@localhost", "password", strategy="sniper", budget=600000),
     ]
 
-    # List of bidder JIDs (used by auctioneer)
-    auctioneer.bidders = [b.jid for b in bidders]
+    # Initialize Auctioneer
+    auctioneer = AuctioneerAgent("auctioneer@localhost", "password")
 
-    # =========================
-    # Create Monitor Agent
-    # =========================
+    # initialize monitor agent
     monitor = MonitorAgent("monitor@localhost", "password")
 
-    # =========================
-    # Start All Agents
-    # =========================
+    auctioneer.items = [
+        {
+            "id": 1,
+            "name": "Gaming Laptop",
+            "description": "16GB RAM, RTX 3060",
+            "current_price": 200000,
+        },
+        {
+            "id": 2,
+            "name": "Smartphone",
+            "description": "Flagship model",
+            "current_price": 80000,
+        },
+    ]
 
+    # Store preconfigured bidders (for backup if registration fails)
+    auctioneer.preconfigured_bidders = [str(b.jid).split("/")[0] for b in bidders]
+
+    auctioneer.bidders = [str(b.jid) for b in bidders]
+
+    await asyncio.sleep(0.5)
+
+    auctioneer.auction_time = 30  # Total time per item
+    auctioneer.round_duration = 5  # Time to wait for bids per round
+    auctioneer.round_pause = 1  # Time between rounds
+
+    # Start auctioneer FIRST
+    print("Starting auctioneer first...")
+    await auctioneer.start()
+    await asyncio.sleep(2)  # Give auctioneer time to set up behaviors
+
+    # Then start bidders
+    print("Starting bidders...")
     for bidder in bidders:
-        await bidder.start(auto_register=True)
+        await bidder.start()
+        await asyncio.sleep(0.5)  # Stagger connections
 
-    await asyncio.sleep(1)
+    # Start monitor
+    print("Starting monitor...")
+    await monitor.start()
 
-    await auctioneer.start(auto_register=True)
-    await monitor.start(auto_register=True)
+    print("\n=== System Ready ===\n")
 
-    print("\nAll agents started. Auction running...\n")
+    while auctioneer.is_alive():
+        try:
+            await asyncio.sleep(1)
+        except KeyboardInterrupt:
+            break
 
-    # =========================
-    # Keep System Alive
-    # =========================
-    # Auction runs inside AuctionBehaviour
-    await asyncio.sleep(auctioneer.auction_time + 5)
-
-    # =========================
-    # Stop All Agents
-    # =========================
-    print("\nStopping agents...\n")
-
+    print("\nStopping agents...")
     for bidder in bidders:
         await bidder.stop()
-
     await auctioneer.stop()
     await monitor.stop()
-
     print("Auction system terminated.")
 
 

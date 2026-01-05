@@ -11,17 +11,8 @@ class BidderAgent(Agent):
         self.budget = budget
 
     async def setup(self):
-        print(
-            f"Bidder {self.jid} started | "
-            f"Strategy: {self.strategy} | "
-            f"Budget: {self.budget}"
-        )
+        self.presence.set_available()
+        print(f"Bidder {self.jid} started | " f"Strategy: {self.strategy} | ")
 
-        template = Template()
-        template.set_metadata("performative", "cfp")
-
-        accept_template = Template()
-        accept_template.set_metadata("performative", "accept")
-
-        self.add_behaviour(BiddingBehaviour(), template)
-        self.add_behaviour(WinBehaviour(), accept_template)
+        self.add_behaviour(BiddingBehaviour())
+        self.add_behaviour(WinBehaviour())
