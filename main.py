@@ -13,7 +13,7 @@ async def main():
             "bidder1@localhost", "password", strategy="aggressive", budget=500000
         ),
         BidderAgent(
-            "bidder2@localhost", "password", strategy="conservative", budget=200000
+            "bidder2@localhost", "password", strategy="conservative", budget=300000
         ),
         BidderAgent("bidder3@localhost", "password", strategy="random", budget=400000),
         BidderAgent("bidder4@localhost", "password", strategy="sniper", budget=600000),
@@ -30,13 +30,19 @@ async def main():
             "id": 1,
             "name": "Gaming Laptop",
             "description": "16GB RAM, RTX 3060",
-            "current_price": 200000,
+            "current_price": 150000,
         },
         {
             "id": 2,
             "name": "Smartphone",
             "description": "Flagship model",
             "current_price": 80000,
+        },
+        {
+            "id": 3,
+            "name": "AirPods",
+            "description": "Flagship model",
+            "current_price": 2000,
         },
     ]
 

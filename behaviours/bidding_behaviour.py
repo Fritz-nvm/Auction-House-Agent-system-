@@ -58,6 +58,11 @@ class BiddingBehaviour(CyclicBehaviour):
                     reply = Message(to=str(msg.sender).split("/")[0])
                     reply.set_metadata("performative", "propose")
                     reply.body = str(int(bid))
+
+                    # record last bid and item so WinBehaviour can reconcile if needed
+                    self.agent.last_bid = int(bid)
+                    self.agent.last_item = item_name
+
                     await self.send(reply)
                     print(f"[{self.agent.jid}] Submitted bid: {bid}")
 
@@ -67,23 +72,21 @@ class BiddingBehaviour(CyclicBehaviour):
     # --- Strategy Methods ---
     def aggressive(self, current_price):
         # Always outbid by a large margin (200k)
-        new_bid = current_price + 20000
+        new_bid = current_price + 5000
         return new_bid if new_bid <= self.agent.budget else self.agent.budget
 
     def conservative(self, current_price):
         # Small increments (50k)
-        new_bid = current_price + 5000
+        new_bid = current_price + 2000
         return new_bid if new_bid <= self.agent.budget else None
 
     def random_strategy(self, current_price):
-        # Random bid between current and budget
-        if self.agent.budget > current_price + 10000:
+        if self.agent.budget > current_price + 5000:
             return random.randint(int(current_price + 1000), int(self.agent.budget))
         return None
 
     def sniper(self, current_price, time_left):
-        # Only bid when less than 10 seconds remain
         if time_left <= 10:
-            new_bid = current_price + 15000
+            new_bid = current_price + 6000
             return new_bid if new_bid <= self.agent.budget else self.agent.budget
         return None
