@@ -10,13 +10,23 @@ async def main():
     #  Initialize Bidders first
     bidders = [
         BidderAgent(
-            "bidder1@localhost", "password", strategy="aggressive", budget=500000
+            "aggressive_agent@localhost",
+            "password",
+            strategy="aggressive",
+            budget=500000,
         ),
         BidderAgent(
-            "bidder2@localhost", "password", strategy="conservative", budget=300000
+            "conservative_agent@localhost",
+            "password",
+            strategy="conservative",
+            budget=300000,
         ),
-        BidderAgent("bidder3@localhost", "password", strategy="random", budget=400000),
-        BidderAgent("bidder4@localhost", "password", strategy="sniper", budget=600000),
+        BidderAgent(
+            "randon_agent@localhost", "password", strategy="random", budget=400000
+        ),
+        BidderAgent(
+            "sniper_agent@localhost", "password", strategy="sniper", budget=600000
+        ),
     ]
 
     # Initialize Auctioneer
@@ -28,21 +38,27 @@ async def main():
     auctioneer.items = [
         {
             "id": 1,
-            "name": "Gaming Laptop",
-            "description": "16GB RAM, RTX 3060",
-            "current_price": 150000,
+            "name": "Custom Gaming Desktop",
+            "description": "Intel i9, RTX 4090, 64GB RAM, Liquid Cooled",
+            "current_price": 350000,
         },
         {
             "id": 2,
-            "name": "Smartphone",
-            "description": "Flagship model",
-            "current_price": 80000,
+            "name": "Ultra-Wide Curved Monitor",
+            "description": "49-inch OLED, 240Hz Refresh Rate, 1ms Response",
+            "current_price": 120000,
         },
         {
             "id": 3,
-            "name": "AirPods",
-            "description": "Flagship model",
-            "current_price": 2000,
+            "name": "Mechanical Keyboard",
+            "description": "Hot-swappable switches, Aluminum Case, RGB",
+            "current_price": 15000,
+        },
+        {
+            "id": 4,
+            "name": "Vintage Film Camera",
+            "description": "35mm SLR with 50mm f/1.8 Lens, Excellent Condition",
+            "current_price": 45000,
         },
     ]
 
@@ -79,6 +95,16 @@ async def main():
             await asyncio.sleep(1)
         except KeyboardInterrupt:
             break
+
+    # Assign unique ports manually
+    for i, bidder in enumerate(bidders):
+        bidder.web_port = 10001 + i  # Ports 10001, 10002, 10003, 10004
+
+    auctioneer = AuctioneerAgent("auctioneer@localhost", "password")
+    auctioneer.web_port = 10000  # Auctioneer on its own port
+
+    monitor = MonitorAgent("monitor@localhost", "password")
+    monitor.web_port = 10005
 
     print("\nStopping agents...")
     for bidder in bidders:
